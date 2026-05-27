@@ -4,7 +4,7 @@ export function Hero() {
   return (
     <section
       aria-label="Treaty Oak Revival meets KETTAMA"
-      className="relative grid min-h-screen grid-cols-1 lg:grid-cols-2"
+      className="relative grid min-h-dvh grid-cols-1 lg:grid-cols-2"
     >
       <h1 className="sr-only">
         Treaty Oak Revival × KETTAMA — a fanmade mood board
@@ -18,7 +18,7 @@ export function Hero() {
           src="/images/hero-country.jpg"
           alt="Dusty open-air country landscape at golden hour"
           fill
-          priority
+          preload
           sizes="(min-width: 1024px) 50vw, 100vw"
           className="object-cover"
           style={{ filter: "grayscale(0.6) sepia(0.5) contrast(0.95)" }}
@@ -31,7 +31,7 @@ export function Hero() {
               "linear-gradient(to bottom, color-mix(in oklab, var(--tor-cream) 85%, transparent) 0%, color-mix(in oklab, var(--tor-rust) 88%, transparent) 100%)",
           }}
         />
-        <div className="relative">
+        <div className="relative z-10">
           <p
             className="mb-6 text-xs uppercase tracking-[0.3em]"
             style={{ fontFamily: "var(--font-playfair)" }}
@@ -69,7 +69,7 @@ export function Hero() {
           src="/images/hero-rave.jpg"
           alt="Foggy nightclub crowd lit by strobes"
           fill
-          priority
+          loading="eager"
           sizes="(min-width: 1024px) 50vw, 100vw"
           className="object-cover"
           style={{ filter: "grayscale(0.85) contrast(1.1) brightness(0.55)" }}
@@ -82,7 +82,7 @@ export function Hero() {
               "radial-gradient(circle at 80% 20%, color-mix(in oklab, var(--kett-acid) 30%, transparent), transparent 55%), color-mix(in oklab, var(--kett-black) 82%, transparent)",
           }}
         />
-        <div className="relative">
+        <div className="relative z-10">
           <p
             className="mb-6 text-xs uppercase tracking-[0.3em]"
             style={{ fontFamily: "var(--font-jetbrains)" }}

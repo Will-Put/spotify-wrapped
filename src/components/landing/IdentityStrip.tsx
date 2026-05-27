@@ -15,9 +15,9 @@ export function IdentityStrip() {
         }}
       >
         <Badge
-          className="w-fit border"
+          variant="outline"
+          className="w-fit"
           style={{
-            backgroundColor: "transparent",
             color: "var(--tor-text)",
             borderColor: "var(--tor-gold)",
             fontFamily: "var(--font-playfair)",
@@ -45,9 +45,9 @@ export function IdentityStrip() {
         }}
       >
         <Badge
-          className="w-fit border"
+          variant="outline"
+          className="w-fit"
           style={{
-            backgroundColor: "transparent",
             color: "var(--kett-acid)",
             borderColor: "var(--kett-acid)",
             fontFamily: "var(--font-jetbrains)",
