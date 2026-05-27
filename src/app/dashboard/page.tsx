@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { HeroCard } from "@/components/dashboard/HeroCard";
+import { TopArtistsCard } from "@/components/dashboard/TopArtistsCard";
 
 export const metadata: Metadata = {
   title: "Dashboard | Spotify Wrapped",
@@ -17,6 +18,7 @@ export default function DashboardPage() {
           <div className="lg:col-span-2">
             <HeroCard />
           </div>
+          <TopArtistsCard />
         </div>
       </div>
     </main>
