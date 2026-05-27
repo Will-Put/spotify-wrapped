@@ -219,11 +219,11 @@ After PR 2, you'll delete all of it. That's intentional.
 - [x] **Verify** — start the dev server, open the page in Chrome, ask Claude to screenshot it via Claude in Chrome and tell you what it sees. Run the **Explain-Show-Test loop**: does it match the plan? Does it look like what you brainstormed?
 - [x] **Iterate** — if the page isn't right, describe what's off in plain English. Claude will adjust.
 - [x] **Commit** — ask Claude: "Commit these changes with a clear message."
-- [ ] **Open a PR** — ask Claude: "Push the branch and open a PR to main."
-- [ ] **Self-review** — run `/code-review` on the PR. Read the findings. Ask Claude to explain anything that doesn't make sense. Decide what to fix and what to ignore.
-- [ ] **Merge** — once the review is clean, merge the PR on github.com.
-- [ ] **Check the deploy** — Vercel should auto-deploy. Visit the live URL. Confirm it shipped.
-- [ ] **Run `/handoff`** to end the session.
+- [x] **Open a PR** — ask Claude: "Push the branch and open a PR to main."
+- [x] **Self-review** — run `/code-review` on the PR. Read the findings. Ask Claude to explain anything that doesn't make sense. Decide what to fix and what to ignore.
+- [x] **Merge** — once the review is clean, merge the PR on github.com.
+- [x] **Check the deploy** — Vercel should auto-deploy. Visit the live URL. Confirm it shipped.
+- [x] **Run `/handoff`** to end the session.
 
 ## PR 2 · A fake-data dashboard
 
