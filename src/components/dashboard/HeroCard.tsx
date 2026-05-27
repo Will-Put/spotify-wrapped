@@ -10,7 +10,7 @@ export function HeroCard() {
       className="gap-0 p-0 ring-0"
       style={{
         background:
-          "linear-gradient(135deg, var(--orange-flame) 0%, var(--orange-deep) 100%)",
+          "linear-gradient(135deg, var(--orange-mid) 0%, var(--orange-deep) 100%)",
         color: "var(--orange-cream)",
       }}
     >

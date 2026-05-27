@@ -7,7 +7,7 @@ export function PersonalityCard() {
       className="h-full gap-0 p-0 ring-0"
       style={{
         background:
-          "linear-gradient(225deg, var(--orange-flame) 0%, var(--orange-deep) 100%)",
+          "linear-gradient(225deg, var(--orange-mid) 0%, var(--orange-deep) 100%)",
         color: "var(--orange-cream)",
       }}
     >
