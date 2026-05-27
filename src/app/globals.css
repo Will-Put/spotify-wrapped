@@ -93,6 +93,12 @@
   --kett-acid: #9FFF3D;
   --kett-text: #F0F0F2;
   --kett-blue: #3D8BFF;
+
+  /* PR 2 burnt-orange signature palette */
+  --orange-flame: #FF4500;
+  --orange-deep:  #1A0500;
+  --orange-cream: #FFE8D6;
+  --orange-mid:   #C2360F;
 }
 
 .dark {
