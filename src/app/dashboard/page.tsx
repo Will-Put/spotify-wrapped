@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { HeroCard } from "@/components/dashboard/HeroCard";
 import { TopArtistsCard } from "@/components/dashboard/TopArtistsCard";
+import { TopTracksCard } from "@/components/dashboard/TopTracksCard";
 
 export const metadata: Metadata = {
   title: "Dashboard | Spotify Wrapped",
@@ -19,6 +20,7 @@ export default function DashboardPage() {
             <HeroCard />
           </div>
           <TopArtistsCard />
+          <TopTracksCard />
         </div>
       </div>
     </main>
