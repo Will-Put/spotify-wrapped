@@ -233,9 +233,9 @@ After PR 2, you'll delete all of it. That's intentional.
 
 ### Steps (compressed — you know the loop)
 
-- [ ] Branch → brainstorm → plan → execute (same shape as PR 1)
-- [ ] Make sure to use shadcn components throughout. No hand-rolled buttons or cards. If you need a primitive that isn't installed, run `npx shadcn@latest add <name>`.
-- [ ] Verify via Claude in Chrome (Explain-Show-Test loop)
+- [x] Branch → brainstorm → plan → execute (same shape as PR 1)
+- [x] Make sure to use shadcn components throughout. No hand-rolled buttons or cards. If you need a primitive that isn't installed, run `npx shadcn@latest add <name>`.
+- [x] Verify via Claude in Chrome (Explain-Show-Test loop)
 - [ ] PR → self-review → merge → check deploy
 - [ ] Run `/handoff`
 

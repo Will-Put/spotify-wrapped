@@ -42,3 +42,6 @@ next-env.d.ts
 
 # claude code (per-machine settings, not shared)
 .claude/settings.local.json
+
+# superpowers brainstorming companion (mockups + server state)
+.superpowers/
