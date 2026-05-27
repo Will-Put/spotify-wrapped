@@ -6,6 +6,9 @@ export function Hero() {
       aria-label="Treaty Oak Revival meets KETTAMA"
       className="relative grid min-h-screen grid-cols-1 lg:grid-cols-2"
     >
+      <h1 className="sr-only">
+        Treaty Oak Revival × KETTAMA — a fanmade mood board
+      </h1>
       {/* Country side */}
       <div
         className="relative flex flex-col justify-end overflow-hidden px-8 py-16 sm:px-12 lg:py-20"
@@ -35,7 +38,7 @@ export function Hero() {
           >
             Side A · Texas
           </p>
-          <h1
+          <h2
             className="font-black leading-[0.85] tracking-tight"
             style={{
               fontFamily: "var(--font-playfair)",
@@ -47,7 +50,7 @@ export function Hero() {
             Oak
             <br />
             Revival
-          </h1>
+          </h2>
           <p
             className="mt-8 text-lg sm:text-xl"
             style={{ fontFamily: "var(--font-playfair)" }}
@@ -86,7 +89,7 @@ export function Hero() {
           >
             Side B · Galway
           </p>
-          <h1
+          <h2
             className="font-bold uppercase leading-[0.85] tracking-tight"
             style={{
               fontFamily: "var(--font-jetbrains)",
@@ -96,7 +99,7 @@ export function Hero() {
             KETT
             <br />
             AMA
-          </h1>
+          </h2>
           <p
             className="mt-8 text-lg uppercase tracking-widest sm:text-xl"
             style={{ fontFamily: "var(--font-jetbrains)" }}
