@@ -1,6 +1,7 @@
 import { Hero } from "@/components/landing/Hero";
 import { IdentityStrip } from "@/components/landing/IdentityStrip";
 import { QuoteClash } from "@/components/landing/QuoteClash";
+import { SiteFooter } from "@/components/landing/SiteFooter";
 
 export default function Home() {
   return (
@@ -8,6 +9,7 @@ export default function Home() {
       <Hero />
       <IdentityStrip />
       <QuoteClash />
+      <SiteFooter />
     </main>
   );
 }
