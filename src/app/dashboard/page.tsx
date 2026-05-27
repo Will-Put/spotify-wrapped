@@ -3,6 +3,7 @@ import { HeroCard } from "@/components/dashboard/HeroCard";
 import { TopArtistsCard } from "@/components/dashboard/TopArtistsCard";
 import { TopTracksCard } from "@/components/dashboard/TopTracksCard";
 import { GenreCard } from "@/components/dashboard/GenreCard";
+import { PersonalityCard } from "@/components/dashboard/PersonalityCard";
 
 export const metadata: Metadata = {
   title: "Dashboard | Spotify Wrapped",
@@ -23,6 +24,7 @@ export default function DashboardPage() {
           <TopArtistsCard />
           <TopTracksCard />
           <GenreCard />
+          <PersonalityCard />
         </div>
       </div>
     </main>
