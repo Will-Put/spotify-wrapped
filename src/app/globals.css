@@ -81,6 +81,18 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Treaty Oak Revival palette — warm/dusty */
+  --tor-cream: #F4EAD5;
+  --tor-rust: #9B5C3F;
+  --tor-text: #1F1410;
+  --tor-gold: #C99A4A;
+
+  /* KETTAMA palette — cold/electric */
+  --kett-black: #0A0A0F;
+  --kett-acid: #9FFF3D;
+  --kett-text: #F0F0F2;
+  --kett-blue: #3D8BFF;
 }
 
 .dark {
@@ -126,5 +138,16 @@
   }
   html {
     @apply font-sans;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }

@@ -159,19 +159,19 @@ You'll do most of this in one session. Claude does the work; you watch and tick 
 
 ## 1.2 — Push to GitHub
 
-- [ ] **Create the GitHub repo** — ask Claude: "Create a GitHub repo for this project called `spotify-wrapped` and push the current code to it."
+- [x] **Create the GitHub repo** — ask Claude: "Create a GitHub repo for this project called `spotify-wrapped` and push the current code to it."
   - Claude will use `gh repo create` and `git push`.
-- [ ] **Turn on branch protection for `main`** — ask Claude: "Walk me through turning on branch protection for `main` on github.com." (This forces you to use PRs and never push directly. The discipline matters.)
+- [x] **Turn on branch protection for `main`** — ask Claude: "Walk me through turning on branch protection for `main` on github.com." (This forces you to use PRs and never push directly. The discipline matters.)
 
 ## 1.3 — Link to Vercel and deploy
 
-- [ ] **Link the repo to Vercel** — ask Claude: "Walk me through linking this repo to a new Vercel project." You'll do some of this in your browser at vercel.com.
-- [ ] **Deploy** — once linked, Vercel auto-deploys on every push to main. Your first deploy happens automatically.
-- [ ] **Visit the live URL.** You should see the same default Next.js page, but now on the public internet. Take a moment to appreciate that.
+- [x] **Link the repo to Vercel** — ask Claude: "Walk me through linking this repo to a new Vercel project." You'll do some of this in your browser at vercel.com.
+- [x] **Deploy** — once linked, Vercel auto-deploys on every push to main. Your first deploy happens automatically.
+- [x] **Visit the live URL.** You should see the same default Next.js page, but now on the public internet. Take a moment to appreciate that.
 
 ## 1.4 — End of Section 1
 
-- [ ] **Run `/handoff`.**
+- [x] **Run `/handoff`.**
 
 ---
 
@@ -212,13 +212,13 @@ After PR 2, you'll delete all of it. That's intentional.
 
 ### Steps (full detail — this is your first time)
 
-- [ ] **Create a feature branch** — ask Claude: "Make a branch called `pr-1-landing-page`."
-- [ ] **Brainstorm** — run `/superpowers:brainstorming` and talk through what you want the page to look like. What's the vibe? What's the "wow"? Don't write any code yet.
-- [ ] **Plan** — run `/superpowers:writing-plans` to capture the plan into a file (`docs/plans/pr-1.md` or similar). Read the plan. Push back if anything feels off.
-- [ ] **Execute** — ask Claude to build it according to the plan. Claude does the typing. You watch what files it's editing.
-- [ ] **Verify** — start the dev server, open the page in Chrome, ask Claude to screenshot it via Claude in Chrome and tell you what it sees. Run the **Explain-Show-Test loop**: does it match the plan? Does it look like what you brainstormed?
-- [ ] **Iterate** — if the page isn't right, describe what's off in plain English. Claude will adjust.
-- [ ] **Commit** — ask Claude: "Commit these changes with a clear message."
+- [x] **Create a feature branch** — ask Claude: "Make a branch called `pr-1-landing-page`."
+- [x] **Brainstorm** — run `/superpowers:brainstorming` and talk through what you want the page to look like. What's the vibe? What's the "wow"? Don't write any code yet.
+- [x] **Plan** — run `/superpowers:writing-plans` to capture the plan into a file (`docs/plans/pr-1.md` or similar). Read the plan. Push back if anything feels off.
+- [x] **Execute** — ask Claude to build it according to the plan. Claude does the typing. You watch what files it's editing.
+- [x] **Verify** — start the dev server, open the page in Chrome, ask Claude to screenshot it via Claude in Chrome and tell you what it sees. Run the **Explain-Show-Test loop**: does it match the plan? Does it look like what you brainstormed?
+- [x] **Iterate** — if the page isn't right, describe what's off in plain English. Claude will adjust.
+- [x] **Commit** — ask Claude: "Commit these changes with a clear message."
 - [ ] **Open a PR** — ask Claude: "Push the branch and open a PR to main."
 - [ ] **Self-review** — run `/code-review` on the PR. Read the findings. Ask Claude to explain anything that doesn't make sense. Decide what to fix and what to ignore.
 - [ ] **Merge** — once the review is clean, merge the PR on github.com.
