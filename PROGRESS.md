@@ -264,13 +264,13 @@ Now you're ready for the real build.
 
 ### Steps
 
-- [ ] Branch → brainstorm OAuth conceptually with Claude (have it explain the flow in plain English first) → plan → execute
-- [ ] Set up environment variables for your Spotify Client ID + Secret (Claude will handle the file, but you'll paste the values from Section 2)
-- [ ] Implement the OAuth 2.0 PKCE flow (Claude does this — your job is to verify it works)
-- [ ] Verify: click "Log in with Spotify," go through the real flow, see your username on screen
-- [ ] PR → self-review → merge → deploy
-- [ ] **Build your own `/handoff` skill** — by now you've felt what it's like to restart a session. Ask Claude: "Help me build my own `/handoff` skill using the `/superpowers:writing-skills` skill. It should write a session summary to `docs/handoffs/` that the next session can read." Use `/superpowers:writing-skills` to do it right.
-- [ ] **Use your new skill** to end this session.
+- [x] Branch → brainstorm OAuth conceptually with Claude (have it explain the flow in plain English first) → plan → execute
+- [x] Set up environment variables for your Spotify Client ID + Secret (Claude will handle the file, but you'll paste the values from Section 2)
+- [x] Implement the OAuth 2.0 PKCE flow (Claude does this — your job is to verify it works)
+- [x] Verify: click "Log in with Spotify," go through the real flow, see your username on screen
+- [x] PR → self-review → merge → deploy
+- [x] **Build your own `/handoff` skill** — by now you've felt what it's like to restart a session. Ask Claude: "Help me build my own `/handoff` skill using the `/superpowers:writing-skills` skill. It should write a session summary to `docs/handoffs/` that the next session can read." Use `/superpowers:writing-skills` to do it right.
+- [x] **Use your new skill** to end this session.
 
 ## PR 4 · First real data on screen
 
@@ -280,9 +280,9 @@ Now you're ready for the real build.
 
 ### Steps
 
-- [ ] Branch → brainstorm → plan → execute → verify → PR → review → merge → deploy
-- [ ] Make sure the dashboard handles: loading (while data is fetching), success (data renders), and error (Spotify is down or the token expired)
-- [ ] End with your new `/handoff` skill
+- [x] Branch → brainstorm → plan → execute → verify → PR → review → merge → deploy
+- [x] Make sure the dashboard handles: loading (while data is fetching), success (data renders), and error (Spotify is down or the token expired)
+- [x] End with your new `/handoff` skill
 
 ## PR 5 · Time-window toggle
 

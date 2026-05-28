@@ -6,55 +6,79 @@ import {
 } from "@/components/ui/card";
 import { LoginButton } from "@/components/auth/login-button";
 import { LogoutButton } from "@/components/auth/logout-button";
+import { TimeRangeToggle } from "@/components/time-range-toggle";
+import { TopArtists } from "@/components/top-artists";
 import { TopTracks } from "@/components/top-tracks";
 import {
   getMe,
   getSession,
+  getTopArtists,
   getTopTracks,
+  parseTimeRange,
+  type SpotifyApiFailureReason,
+  type SpotifyArtist,
   type SpotifyTrack,
+  type TimeRange,
 } from "@/lib/spotify";
 
 type ViewState =
   | { kind: "anonymous" }
-  | { kind: "logged-in"; displayName: string; tracks: SpotifyTrack[] }
+  | {
+      kind: "logged-in";
+      displayName: string;
+      timeRange: TimeRange;
+      tracks: SpotifyTrack[];
+      artists: SpotifyArtist[];
+    }
   | { kind: "expired" }
   | { kind: "spotify-down" };
 
-async function resolveViewState(): Promise<ViewState> {
+// Map a failed Spotify result to the right view state.
+// 401 → expired (re-login fixes it); anything else → spotify-down (transient).
+function failureState(result: {
+  ok: false;
+  status: number;
+  reason: SpotifyApiFailureReason;
+}): Extract<ViewState, { kind: "expired" | "spotify-down" }> {
+  if (result.reason === "http" && result.status === 401) {
+    return { kind: "expired" };
+  }
+  return { kind: "spotify-down" };
+}
+
+async function resolveViewState(timeRange: TimeRange): Promise<ViewState> {
   const session = await getSession();
   if (!session) return { kind: "anonymous" };
 
-  // Fetch profile + top tracks in parallel — both need the same token.
-  const [meResult, tracksResult] = await Promise.all([
+  // Fetch profile + tracks + artists in parallel for the chosen window.
+  const [meResult, tracksResult, artistsResult] = await Promise.all([
     getMe(session.accessToken),
-    getTopTracks(session.accessToken, { limit: 10, timeRange: "short_term" }),
+    getTopTracks(session.accessToken, { limit: 10, timeRange }),
+    getTopArtists(session.accessToken, { limit: 10, timeRange }),
   ]);
 
-  // Strict policy: a definitive 401 means re-login; anything else is
-  // transient and routes to spotify-down. First failure wins.
-  if (!meResult.ok) {
-    if (meResult.reason === "http" && meResult.status === 401) {
-      return { kind: "expired" };
-    }
-    return { kind: "spotify-down" };
-  }
-  if (!tracksResult.ok) {
-    if (tracksResult.reason === "http" && tracksResult.status === 401) {
-      return { kind: "expired" };
-    }
-    return { kind: "spotify-down" };
-  }
+  // Each check narrows the result to ok:true for the success branch below.
+  if (!meResult.ok) return failureState(meResult);
+  if (!tracksResult.ok) return failureState(tracksResult);
+  if (!artistsResult.ok) return failureState(artistsResult);
 
   return {
     kind: "logged-in",
     // display_name can be null (rare). Fall back to the user's Spotify ID.
     displayName: meResult.profile.display_name ?? meResult.profile.id,
+    timeRange,
     tracks: tracksResult.tracks,
+    artists: artistsResult.artists,
   };
 }
 
-export default async function Home() {
-  const view = await resolveViewState();
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string }>;
+}) {
+  const { range } = await searchParams;
+  const view = await resolveViewState(parseTimeRange(range));
 
   return (
     <main className="flex flex-1 items-center justify-center p-6">
@@ -81,7 +105,13 @@ export default async function Home() {
           )}
         </CardHeader>
         <CardContent className="space-y-4">
-          {view.kind === "logged-in" && <TopTracks tracks={view.tracks} />}
+          {view.kind === "logged-in" && (
+            <>
+              <TimeRangeToggle current={view.timeRange} />
+              <TopTracks tracks={view.tracks} />
+              <TopArtists artists={view.artists} />
+            </>
+          )}
           {view.kind === "logged-in" ? <LogoutButton /> : <LoginButton />}
         </CardContent>
       </Card>

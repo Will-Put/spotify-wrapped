@@ -41,6 +41,21 @@ export type SpotifyProfile = {
 
 export type SpotifyApiFailureReason = "http" | "network" | "parse";
 
+export type TimeRange = "short_term" | "medium_term" | "long_term";
+
+const TIME_RANGES: readonly TimeRange[] = [
+  "short_term",
+  "medium_term",
+  "long_term",
+];
+
+/** Coerce an untrusted URL value to a valid window; default to short_term. */
+export function parseTimeRange(value: string | undefined): TimeRange {
+  return TIME_RANGES.includes(value as TimeRange)
+    ? (value as TimeRange)
+    : "short_term";
+}
+
 export type GetMeResult =
   | { ok: true; profile: SpotifyProfile }
   | { ok: false; status: number; reason: SpotifyApiFailureReason };
@@ -57,6 +72,19 @@ export type SpotifyTrack = {
 
 export type GetTopTracksResult =
   | { ok: true; tracks: SpotifyTrack[] }
+  | { ok: false; status: number; reason: SpotifyApiFailureReason };
+
+export type SpotifyArtist = {
+  id: string;
+  name: string;
+  // `genres` and `images` are documented as always-present, but the live API
+  // omits them for some artists — keep them optional and access defensively.
+  genres?: string[];
+  images?: { url: string; height: number; width: number }[];
+};
+
+export type GetTopArtistsResult =
+  | { ok: true; artists: SpotifyArtist[] }
   | { ok: false; status: number; reason: SpotifyApiFailureReason };
 
 /**
@@ -102,7 +130,7 @@ export async function getMe(accessToken: string): Promise<GetMeResult> {
 
 type TopTracksOptions = {
   limit?: number;
-  timeRange?: "short_term" | "medium_term" | "long_term";
+  timeRange?: TimeRange;
 };
 
 /**
@@ -142,6 +170,50 @@ export async function getTopTracks(
       return { ok: false, status: response.status, reason: "parse" };
     }
     return { ok: true, tracks: data.items };
+  } catch {
+    return { ok: false, status: response.status, reason: "parse" };
+  }
+}
+
+type TopArtistsOptions = {
+  limit?: number;
+  timeRange?: TimeRange;
+};
+
+/**
+ * Call Spotify's `/v1/me/top/artists` with the given access token.
+ *
+ * Mirrors `getTopTracks` exactly — same options, same discriminated-union
+ * return shape, same Array.isArray guard so a malformed 200 degrades to
+ * spotify-down instead of crashing downstream.
+ */
+export async function getTopArtists(
+  accessToken: string,
+  options: TopArtistsOptions = {},
+): Promise<GetTopArtistsResult> {
+  const { limit = 10, timeRange = "short_term" } = options;
+  const url = `${SPOTIFY_API}/me/top/artists?time_range=${timeRange}&limit=${limit}`;
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: "no-store",
+    });
+  } catch {
+    return { ok: false, status: 0, reason: "network" };
+  }
+
+  if (!response.ok) {
+    return { ok: false, status: response.status, reason: "http" };
+  }
+
+  try {
+    const data = (await response.json()) as { items?: SpotifyArtist[] };
+    if (!Array.isArray(data.items)) {
+      return { ok: false, status: response.status, reason: "parse" };
+    }
+    return { ok: true, artists: data.items };
   } catch {
     return { ok: false, status: response.status, reason: "parse" };
   }
