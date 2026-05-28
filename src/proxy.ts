@@ -8,20 +8,37 @@ const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
 // request that arrives right at the boundary still gets a fresh token.
 const REFRESH_BUFFER_MS = 60_000;
 
+// Same cookie attributes as the OAuth callback (src/app/api/auth/callback/route.ts).
+const SESSION_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  path: "/",
+  maxAge: 60 * 60 * 24 * 30, // 30 days
+} as const;
+
 /**
  * Token-refresh proxy (Next.js 16's renamed middleware). Runs on the
  * Node.js runtime for every request matching `config.matcher`.
  *
- * Every branch returns `NextResponse.next()` (the `response` variable) so
- * the request ALWAYS continues — the proxy never blocks the user. The
- * cookie is only deleted on a definitive "refresh token is dead" signal
- * (400/401 from Spotify, or a malformed cookie). Transient failures keep
- * the existing cookie so a brief Spotify hiccup doesn't log anyone out.
+ * Every branch continues the request (`NextResponse.next()`) — the proxy
+ * never blocks the user. The cookie is only cleared on a definitive
+ * "refresh token is dead" signal (400/401 from Spotify, or a malformed
+ * cookie). Transient failures keep the existing cookie so a brief Spotify
+ * hiccup doesn't log anyone out.
+ *
+ * IMPORTANT — same-request propagation: when we refresh (or clear) the
+ * cookie we write it to BOTH the request and the response. Writing only to
+ * the response sets a Set-Cookie header for the *browser's next* request,
+ * but the page rendering on THIS request reads the *incoming* request
+ * cookies (via `cookies()` in a Server Component) — which would still hold
+ * the stale token. Mutating `request.cookies` and forwarding the request
+ * via `next({ request })` is what makes the current render see the fresh
+ * token, so the refresh is truly silent (no "session expired" flicker).
  */
 export async function proxy(request: NextRequest) {
-  const response = NextResponse.next();
   const cookie = request.cookies.get(COOKIE_NAMES.session);
-  if (!cookie) return response;
+  if (!cookie) return NextResponse.next();
 
   let session: SessionCookieValue;
   try {
@@ -30,21 +47,19 @@ export async function proxy(request: NextRequest) {
       typeof session.refreshToken !== "string" ||
       typeof session.expiresAt !== "number"
     ) {
-      response.cookies.delete(COOKIE_NAMES.session);
-      return response;
+      return clearSession(request);
     }
   } catch {
-    response.cookies.delete(COOKIE_NAMES.session);
-    return response;
+    return clearSession(request);
   }
 
   // Fast path: token still has more than REFRESH_BUFFER_MS of life left.
   if (session.expiresAt > Date.now() + REFRESH_BUFFER_MS) {
-    return response;
+    return NextResponse.next();
   }
 
   const clientId = process.env.SPOTIFY_CLIENT_ID;
-  if (!clientId) return response;
+  if (!clientId) return NextResponse.next();
 
   let tokenResponse: Response;
   try {
@@ -60,16 +75,15 @@ export async function proxy(request: NextRequest) {
     });
   } catch {
     // Network error reaching Spotify — keep the old cookie, let the page try.
-    return response;
+    return NextResponse.next();
   }
 
-  // Definitive "refresh token is dead" — delete cookie, page goes anonymous.
+  // Definitive "refresh token is dead" — clear cookie, page goes anonymous.
   if (tokenResponse.status === 400 || tokenResponse.status === 401) {
-    response.cookies.delete(COOKIE_NAMES.session);
-    return response;
+    return clearSession(request);
   }
   // Any other non-2xx (5xx, rate limit) — transient, keep the old cookie.
-  if (!tokenResponse.ok) return response;
+  if (!tokenResponse.ok) return NextResponse.next();
 
   let tokens: {
     access_token?: string;
@@ -79,14 +93,14 @@ export async function proxy(request: NextRequest) {
   try {
     tokens = await tokenResponse.json();
   } catch {
-    return response;
+    return NextResponse.next();
   }
 
   if (
     typeof tokens.access_token !== "string" ||
     typeof tokens.expires_in !== "number"
   ) {
-    return response;
+    return NextResponse.next();
   }
 
   const newSession: SessionCookieValue = {
@@ -95,16 +109,29 @@ export async function proxy(request: NextRequest) {
     refreshToken: tokens.refresh_token ?? session.refreshToken,
     expiresAt: Date.now() + tokens.expires_in * 1000,
   };
+  const value = JSON.stringify(newSession);
 
-  // Same cookie attributes as the OAuth callback (src/app/api/auth/callback/route.ts).
-  response.cookies.set(COOKIE_NAMES.session, JSON.stringify(newSession), {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 30, // 30 days
+  // (1) Update the request so THIS render reads the fresh token.
+  request.cookies.set(COOKIE_NAMES.session, value);
+  const response = NextResponse.next({
+    request: { headers: request.headers },
   });
+  // (2) Persist to the browser for future requests.
+  response.cookies.set(COOKIE_NAMES.session, value, SESSION_COOKIE_OPTIONS);
+  return response;
+}
 
+/**
+ * Drop the session from BOTH the in-flight request (so the page renders the
+ * anonymous state on this same request) and the browser (so it's gone next
+ * time). See the same-request propagation note on `proxy` above.
+ */
+function clearSession(request: NextRequest) {
+  request.cookies.delete(COOKIE_NAMES.session);
+  const response = NextResponse.next({
+    request: { headers: request.headers },
+  });
+  response.cookies.delete(COOKIE_NAMES.session);
   return response;
 }
 

@@ -134,7 +134,13 @@ export async function getTopTracks(
   }
 
   try {
-    const data = (await response.json()) as { items: SpotifyTrack[] };
+    const data = (await response.json()) as { items?: SpotifyTrack[] };
+    // A 200 with a missing/non-array `items` is a broken shape — treat it
+    // like a parse failure so the page degrades to spotify-down instead of
+    // crashing on `tracks.length` downstream.
+    if (!Array.isArray(data.items)) {
+      return { ok: false, status: response.status, reason: "parse" };
+    }
     return { ok: true, tracks: data.items };
   } catch {
     return { ok: false, status: response.status, reason: "parse" };
