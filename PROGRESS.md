@@ -187,7 +187,7 @@ Before you can pull Spotify data, you need to register your app with Spotify so 
 
 ## 2.1 — End of Section 2
 
-- [ ] **Run `/handoff`.**
+- [x] **Run `/handoff`.**
 
 You're ready to build. The next thing you do is open a new session and ask Claude "what's next?" — and PR 1 begins.
 
