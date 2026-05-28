@@ -290,7 +290,7 @@ Now you're ready for the real build.
 
 **The lesson:** Client-side state, URL params (so the selection persists across reload), list component reuse.
 
-- [ ] Branch → brainstorm → plan → execute → verify → PR → review → merge → deploy → handoff
+- [x] Branch → brainstorm → plan → execute → verify → PR → review → merge → deploy → handoff
 
 ## PR 6 · Recently played + now playing
 
