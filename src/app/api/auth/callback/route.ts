@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { COOKIE_NAMES, type PkceCookieValue } from "@/lib/auth";
+import { sameHostUrl } from "@/lib/url";
 
 const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
 
@@ -109,5 +110,5 @@ export async function GET(request: NextRequest) {
 
   cookieStore.delete(COOKIE_NAMES.pkce);
 
-  return NextResponse.redirect(new URL("/", request.url));
+  return NextResponse.redirect(sameHostUrl(request, "/"));
 }
