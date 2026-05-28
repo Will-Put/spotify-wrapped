@@ -218,3 +218,103 @@ export async function getTopArtists(
     return { ok: false, status: response.status, reason: "parse" };
   }
 }
+
+export type RecentlyPlayedItem = {
+  track: SpotifyTrack;
+  playedAt: string; // ISO 8601, from the API's `played_at`
+};
+
+export type GetRecentlyPlayedResult =
+  | { ok: true; items: RecentlyPlayedItem[] }
+  | { ok: false; status: number; reason: SpotifyApiFailureReason };
+
+type RecentlyPlayedOptions = { limit?: number };
+
+/**
+ * Call Spotify's `/v1/me/player/recently-played`. Same discriminated-union
+ * shape as the other helpers. Maps the API's `played_at` → `playedAt`.
+ */
+export async function getRecentlyPlayed(
+  accessToken: string,
+  options: RecentlyPlayedOptions = {},
+): Promise<GetRecentlyPlayedResult> {
+  const { limit = 10 } = options;
+  const url = `${SPOTIFY_API}/me/player/recently-played?limit=${limit}`;
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: "no-store",
+    });
+  } catch {
+    return { ok: false, status: 0, reason: "network" };
+  }
+
+  if (!response.ok) {
+    return { ok: false, status: response.status, reason: "http" };
+  }
+
+  try {
+    const data = (await response.json()) as {
+      items?: { track: SpotifyTrack; played_at: string }[];
+    };
+    if (!Array.isArray(data.items)) {
+      return { ok: false, status: response.status, reason: "parse" };
+    }
+    const items = data.items.map((it) => ({
+      track: it.track,
+      playedAt: it.played_at,
+    }));
+    return { ok: true, items };
+  } catch {
+    return { ok: false, status: response.status, reason: "parse" };
+  }
+}
+
+export type NowPlayingResult =
+  | { playing: false }
+  | { playing: true; track: SpotifyTrack };
+
+/**
+ * Call Spotify's `/v1/me/player/currently-playing`. Non-critical widget —
+ * every failure (204 nothing playing, paused, podcast/ad, network, 401, 5xx)
+ * resolves to `{ playing: false }` so the indicator simply hides.
+ */
+export async function getNowPlaying(
+  accessToken: string,
+): Promise<NowPlayingResult> {
+  let response: Response;
+  try {
+    response = await fetch(`${SPOTIFY_API}/me/player/currently-playing`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: "no-store",
+    });
+  } catch {
+    return { playing: false };
+  }
+
+  // 204 = nothing playing (success, NOT an error). Any non-2xx → hide.
+  if (response.status === 204 || !response.ok) {
+    return { playing: false };
+  }
+
+  try {
+    const data = (await response.json()) as {
+      is_playing?: boolean;
+      currently_playing_type?: string;
+      item?: SpotifyTrack | null;
+    };
+    // Only show actively-playing *tracks* (not paused, not podcasts/ads).
+    if (
+      !data.is_playing ||
+      data.currently_playing_type !== "track" ||
+      !data.item
+    ) {
+      return { playing: false };
+    }
+    return { playing: true, track: data.item };
+  } catch {
+    return { playing: false };
+  }
+}
