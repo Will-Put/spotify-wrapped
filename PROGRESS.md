@@ -245,10 +245,10 @@ After PR 2, you'll delete all of it. That's intentional.
 
 Time to throw away the playground. Don't worry — the muscle memory stays.
 
-- [ ] **Start a fresh session.** Tell Claude: "We're done with the playground. Reset the app to a clean Next.js + shadcn skeleton — delete the landing page and the fake dashboard."
-- [ ] Claude will guide you through removing the playground code and getting back to a clean state on a branch.
-- [ ] **Open a PR for the reset, merge it.** Treat the reset itself as a PR.
-- [ ] **Run `/handoff`.**
+- [x] **Start a fresh session.** Tell Claude: "We're done with the playground. Reset the app to a clean Next.js + shadcn skeleton — delete the landing page and the fake dashboard."
+- [x] Claude will guide you through removing the playground code and getting back to a clean state on a branch.
+- [x] **Open a PR for the reset, merge it.** Treat the reset itself as a PR.
+- [x] **Run `/handoff`.**
 
 Now you're ready for the real build.
 
