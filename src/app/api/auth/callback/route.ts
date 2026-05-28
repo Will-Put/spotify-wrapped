@@ -84,13 +84,23 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const tokens = (await tokenResponse.json()) as {
+  type SpotifyTokenResponse = {
     access_token: string;
     refresh_token: string;
     expires_in: number;
     token_type: string;
     scope: string;
   };
+
+  let tokens: SpotifyTokenResponse;
+  try {
+    tokens = (await tokenResponse.json()) as SpotifyTokenResponse;
+  } catch {
+    return new NextResponse(
+      "Token exchange returned a malformed response. Please try logging in again.",
+      { status: 502 },
+    );
+  }
 
   cookieStore.set(
     COOKIE_NAMES.session,
