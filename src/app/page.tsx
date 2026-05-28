@@ -11,7 +11,8 @@ import { getMe, getSession } from "@/lib/spotify";
 type ViewState =
   | { kind: "anonymous" }
   | { kind: "logged-in"; displayName: string }
-  | { kind: "expired" };
+  | { kind: "expired" }
+  | { kind: "spotify-down" };
 
 async function resolveViewState(): Promise<ViewState> {
   const session = await getSession();
@@ -25,7 +26,13 @@ async function resolveViewState(): Promise<ViewState> {
       displayName: result.profile.display_name ?? result.profile.id,
     };
   }
-  return { kind: "expired" };
+  // Token is genuinely bad (revoked, expired, malformed) → user can re-login.
+  if (result.reason === "http" && result.status === 401) {
+    return { kind: "expired" };
+  }
+  // Everything else (5xx from Spotify, rate limits, network errors, parse
+  // errors) is a transient problem the user can't fix by re-logging in.
+  return { kind: "spotify-down" };
 }
 
 export default async function Home() {
@@ -48,6 +55,11 @@ export default async function Home() {
           )}
           {view.kind === "expired" && (
             <CardDescription>Your session expired.</CardDescription>
+          )}
+          {view.kind === "spotify-down" && (
+            <CardDescription>
+              Spotify is having trouble right now. Try again in a moment.
+            </CardDescription>
           )}
         </CardHeader>
         <CardContent>

@@ -39,30 +39,49 @@ export type SpotifyProfile = {
   email: string;
 };
 
+export type GetMeFailureReason = "http" | "network" | "parse";
+
 export type GetMeResult =
   | { ok: true; profile: SpotifyProfile }
-  | { ok: false; status: number };
+  | { ok: false; status: number; reason: GetMeFailureReason };
 
 /**
  * Call Spotify's `/v1/me` with the given access token.
  *
- * - 200 → returns the user's profile
- * - 401 → access token expired or revoked (caller should show "session expired")
- * - other non-2xx → returns the status so caller can decide what to do
+ * Returns a discriminated union so callers can distinguish:
+ * - ok: profile usable
+ * - reason "http", status 401 → access token expired or revoked
+ * - reason "http", status other → Spotify HTTP error (5xx, 429, etc.)
+ * - reason "network", status 0 → fetch threw (DNS, connection refused, timeout)
+ * - reason "parse", status 200 → response body wasn't valid JSON
  *
  * `cache: "no-store"` because authenticated responses must never be
  * cached at the Next.js fetch layer.
  */
 export async function getMe(accessToken: string): Promise<GetMeResult> {
-  const response = await fetch(`${SPOTIFY_API}/me`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    return { ok: false, status: response.status };
+  let response: Response;
+  try {
+    response = await fetch(`${SPOTIFY_API}/me`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: "no-store",
+    });
+  } catch {
+    // Network failure: DNS lookup failed, connection refused, timeout, etc.
+    // Returning a structured result (instead of letting fetch throw upstream)
+    // lets the home page degrade gracefully rather than 500.
+    return { ok: false, status: 0, reason: "network" };
   }
 
-  const profile = (await response.json()) as SpotifyProfile;
-  return { ok: true, profile };
+  if (!response.ok) {
+    return { ok: false, status: response.status, reason: "http" };
+  }
+
+  try {
+    const profile = (await response.json()) as SpotifyProfile;
+    return { ok: true, profile };
+  } catch {
+    // Spotify returned 200 with a body we couldn't parse as JSON.
+    // Vanishingly rare but real (proxy issues, partial response).
+    return { ok: false, status: response.status, reason: "parse" };
+  }
 }
