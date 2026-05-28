@@ -3,9 +3,7 @@ import type { SpotifyTrack } from "@/lib/spotify";
 export function TopTracks({ tracks }: { tracks: SpotifyTrack[] }) {
   return (
     <div className="space-y-3">
-      <h2 className="text-sm font-medium text-muted-foreground">
-        Your top tracks (last 4 weeks)
-      </h2>
+      <h2 className="text-sm font-medium text-muted-foreground">Top tracks</h2>
       {tracks.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           No top tracks yet. Listen to some music on Spotify and come back in a
