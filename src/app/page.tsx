@@ -6,11 +6,17 @@ import {
 } from "@/components/ui/card";
 import { LoginButton } from "@/components/auth/login-button";
 import { LogoutButton } from "@/components/auth/logout-button";
-import { getMe, getSession } from "@/lib/spotify";
+import { TopTracks } from "@/components/top-tracks";
+import {
+  getMe,
+  getSession,
+  getTopTracks,
+  type SpotifyTrack,
+} from "@/lib/spotify";
 
 type ViewState =
   | { kind: "anonymous" }
-  | { kind: "logged-in"; displayName: string }
+  | { kind: "logged-in"; displayName: string; tracks: SpotifyTrack[] }
   | { kind: "expired" }
   | { kind: "spotify-down" };
 
@@ -18,21 +24,33 @@ async function resolveViewState(): Promise<ViewState> {
   const session = await getSession();
   if (!session) return { kind: "anonymous" };
 
-  const result = await getMe(session.accessToken);
-  if (result.ok) {
-    return {
-      kind: "logged-in",
-      // display_name can be null (rare). Fall back to the user's Spotify ID.
-      displayName: result.profile.display_name ?? result.profile.id,
-    };
+  // Fetch profile + top tracks in parallel — both need the same token.
+  const [meResult, tracksResult] = await Promise.all([
+    getMe(session.accessToken),
+    getTopTracks(session.accessToken, { limit: 10, timeRange: "short_term" }),
+  ]);
+
+  // Strict policy: a definitive 401 means re-login; anything else is
+  // transient and routes to spotify-down. First failure wins.
+  if (!meResult.ok) {
+    if (meResult.reason === "http" && meResult.status === 401) {
+      return { kind: "expired" };
+    }
+    return { kind: "spotify-down" };
   }
-  // Token is genuinely bad (revoked, expired, malformed) → user can re-login.
-  if (result.reason === "http" && result.status === 401) {
-    return { kind: "expired" };
+  if (!tracksResult.ok) {
+    if (tracksResult.reason === "http" && tracksResult.status === 401) {
+      return { kind: "expired" };
+    }
+    return { kind: "spotify-down" };
   }
-  // Everything else (5xx from Spotify, rate limits, network errors, parse
-  // errors) is a transient problem the user can't fix by re-logging in.
-  return { kind: "spotify-down" };
+
+  return {
+    kind: "logged-in",
+    // display_name can be null (rare). Fall back to the user's Spotify ID.
+    displayName: meResult.profile.display_name ?? meResult.profile.id,
+    tracks: tracksResult.tracks,
+  };
 }
 
 export default async function Home() {
@@ -62,7 +80,8 @@ export default async function Home() {
             </CardDescription>
           )}
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          {view.kind === "logged-in" && <TopTracks tracks={view.tracks} />}
           {view.kind === "logged-in" ? <LogoutButton /> : <LoginButton />}
         </CardContent>
       </Card>
