@@ -138,4 +138,4 @@ function clearSession(request: NextRequest) {
 // Only run on the home page for PR 4. PR 5+ will widen this matcher as
 // more routes need fresh auth. Do NOT add a `runtime` key — proxy is
 // Node.js-only in Next 16 and setting `runtime` throws at build time.
-export const config = { matcher: ["/"] };
+export const config = { matcher: ["/", "/api/now-playing"] };
