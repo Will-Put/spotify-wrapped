@@ -77,8 +77,10 @@ export type GetTopTracksResult =
 export type SpotifyArtist = {
   id: string;
   name: string;
-  genres: string[];
-  images: { url: string; height: number; width: number }[];
+  // `genres` and `images` are documented as always-present, but the live API
+  // omits them for some artists — keep them optional and access defensively.
+  genres?: string[];
+  images?: { url: string; height: number; width: number }[];
 };
 
 export type GetTopArtistsResult =

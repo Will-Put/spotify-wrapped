@@ -12,9 +12,12 @@ export function TopArtists({ artists }: { artists: SpotifyArtist[] }) {
       ) : (
         <ol className="space-y-2">
           {artists.map((artist, i) => {
+            // Spotify can omit `images`/`genres` on some artists, so index
+            // defensively (?.) — the type says these are always present, but
+            // the live API doesn't always agree.
             const photo =
-              artist.images[2] ?? artist.images[1] ?? artist.images[0];
-            const topGenre = artist.genres[0];
+              artist.images?.[2] ?? artist.images?.[1] ?? artist.images?.[0];
+            const topGenre = artist.genres?.[0];
             return (
               <li key={artist.id} className="flex items-center gap-3">
                 <span className="w-6 text-right text-sm tabular-nums text-muted-foreground">
