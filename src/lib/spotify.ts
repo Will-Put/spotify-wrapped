@@ -39,11 +39,25 @@ export type SpotifyProfile = {
   email: string;
 };
 
-export type GetMeFailureReason = "http" | "network" | "parse";
+export type SpotifyApiFailureReason = "http" | "network" | "parse";
 
 export type GetMeResult =
   | { ok: true; profile: SpotifyProfile }
-  | { ok: false; status: number; reason: GetMeFailureReason };
+  | { ok: false; status: number; reason: SpotifyApiFailureReason };
+
+export type SpotifyTrack = {
+  id: string;
+  name: string;
+  artists: { id: string; name: string }[];
+  album: {
+    name: string;
+    images: { url: string; height: number; width: number }[];
+  };
+};
+
+export type GetTopTracksResult =
+  | { ok: true; tracks: SpotifyTrack[] }
+  | { ok: false; status: number; reason: SpotifyApiFailureReason };
 
 /**
  * Call Spotify's `/v1/me` with the given access token.
@@ -82,6 +96,47 @@ export async function getMe(accessToken: string): Promise<GetMeResult> {
   } catch {
     // Spotify returned 200 with a body we couldn't parse as JSON.
     // Vanishingly rare but real (proxy issues, partial response).
+    return { ok: false, status: response.status, reason: "parse" };
+  }
+}
+
+type TopTracksOptions = {
+  limit?: number;
+  timeRange?: "short_term" | "medium_term" | "long_term";
+};
+
+/**
+ * Call Spotify's `/v1/me/top/tracks` with the given access token.
+ *
+ * Defaults to the last-4-weeks window (`short_term`) and 10 tracks.
+ * PR 5 will pass `timeRange` to switch windows. Same discriminated-union
+ * return shape as `getMe` so callers handle failures identically.
+ */
+export async function getTopTracks(
+  accessToken: string,
+  options: TopTracksOptions = {},
+): Promise<GetTopTracksResult> {
+  const { limit = 10, timeRange = "short_term" } = options;
+  const url = `${SPOTIFY_API}/me/top/tracks?time_range=${timeRange}&limit=${limit}`;
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: "no-store",
+    });
+  } catch {
+    return { ok: false, status: 0, reason: "network" };
+  }
+
+  if (!response.ok) {
+    return { ok: false, status: response.status, reason: "http" };
+  }
+
+  try {
+    const data = (await response.json()) as { items: SpotifyTrack[] };
+    return { ok: true, tracks: data.items };
+  } catch {
     return { ok: false, status: response.status, reason: "parse" };
   }
 }
