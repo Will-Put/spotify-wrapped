@@ -98,7 +98,7 @@ That's the entire install list. Nothing to memorize. From here on, anytime you r
 GitHub is where your code lives in the cloud. You need an account.
 
 - [x] **Create a GitHub account** if you don't have one — go to [github.com/signup](https://github.com/signup).
-- [] **Authenticate the gh CLI** so Claude can push code on your behalf.
+- [x] **Authenticate the gh CLI** so Claude can push code on your behalf.
   - Ask Claude: "Walk me through `gh auth login`." It'll open a browser flow.
 
 ## 0.4 — Install Superpowers (Claude skills)
@@ -179,11 +179,11 @@ You'll do most of this in one session. Claude does the work; you watch and tick 
 
 Before you can pull Spotify data, you need to register your app with Spotify so they know who you are.
 
-- [ ] **Create a Spotify Developer account** at [developer.spotify.com](https://developer.spotify.com). Use the same account you listen to music with.
-- [ ] **Register your app** — ask Claude to walk you through it on the Spotify dashboard. You'll need:
+- [x] **Create a Spotify Developer account** at [developer.spotify.com](https://developer.spotify.com). Use the same account you listen to music with.
+- [x] **Register your app** — ask Claude to walk you through it on the Spotify dashboard. You'll need:
   - App name: "Spotify Wrapped" (or whatever)
-  - Redirect URI: this matters — you'll have one for local dev (`http://localhost:3000/api/auth/callback`) and one for production (`https://<your-vercel-url>/api/auth/callback`). Add both.
-- [ ] **Save your Client ID and Client Secret somewhere safe.** Claude will store them as environment variables when you set up OAuth in PR 3.
+  - Redirect URI: this matters — you'll have one for local dev (`http://127.0.0.1:3000/api/auth/callback`) and one for production (`https://<your-vercel-url>/api/auth/callback`). Add both. *(Note: Spotify now requires `127.0.0.1` instead of `localhost` for loopback URIs.)*
+- [x] **Save your Client ID and Client Secret somewhere safe.** Claude will store them as environment variables when you set up OAuth in PR 3.
 
 ## 2.1 — End of Section 2
 
