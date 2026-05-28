@@ -257,15 +257,19 @@ export async function getRecentlyPlayed(
 
   try {
     const data = (await response.json()) as {
-      items?: { track: SpotifyTrack; played_at: string }[];
+      items?: { track: SpotifyTrack | null; played_at: string }[];
     };
     if (!Array.isArray(data.items)) {
       return { ok: false, status: response.status, reason: "parse" };
     }
-    const items = data.items.map((it) => ({
-      track: it.track,
-      playedAt: it.played_at,
-    }));
+    // Spotify can include plays with a null `track` (unavailable/removed).
+    // Drop them so downstream rendering never dereferences null.
+    const items = data.items
+      .filter(
+        (it): it is { track: SpotifyTrack; played_at: string } =>
+          it.track != null,
+      )
+      .map((it) => ({ track: it.track, playedAt: it.played_at }));
     return { ok: true, items };
   } catch {
     return { ok: false, status: response.status, reason: "parse" };
