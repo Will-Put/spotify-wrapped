@@ -45,3 +45,6 @@ next-env.d.ts
 
 # superpowers brainstorming companion (mockups + server state)
 .superpowers/
+
+# stray screenshots at repo root
+/Screenshot*.png

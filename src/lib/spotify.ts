@@ -68,6 +68,9 @@ export type SpotifyTrack = {
     name: string;
     images: { url: string; height: number; width: number }[];
   };
+  // Track length in milliseconds. Optional + read defensively (default 0)
+  // because the live API has omitted documented fields before.
+  duration_ms?: number;
 };
 
 export type GetTopTracksResult =
