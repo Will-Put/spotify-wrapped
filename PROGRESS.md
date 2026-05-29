@@ -326,7 +326,9 @@ Now you're ready for the real build.
 
 **The lesson:** Shipping polish is its own skill. Polish PRs feel slow and small but they're what makes the difference between "fine" and "good."
 
-- [ ] Branch → brainstorm what "polished" means → plan → execute → verify → PR → review → merge → deploy → handoff
+> **SHIPPED (2026-05-29):** Four pieces — fixed the `--font-sans` self-reference (headings were rendering serif), per-section streaming with skeletons + graceful per-section errors (one failed section no longer blanks the dashboard), and a system-default dark mode toggle (`next-themes`). Verification caught a real hydration mismatch on the toggle (fixed with `useSyncExternalStore`); `/code-review` caught a dishonest "no recent plays" label when the call fails (fixed to "unavailable"). Mobile pass was code-verified only (screenshot tool couldn't narrow the viewport). PR #11.
+
+- [x] Branch → brainstorm what "polished" means → plan → execute → verify → PR → review → merge → deploy → handoff
 
 ## PR 10 · Signature feature + production submission
 
