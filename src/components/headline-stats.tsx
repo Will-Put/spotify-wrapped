@@ -3,7 +3,9 @@ import { Card, CardContent } from "@/components/ui/card";
 type HeadlineStatsProps = {
   topArtist: string | null;
   topTrack: string | null;
-  recentTimeLabel: string;
+  // null when there's no usable time estimate (e.g. Spotify omitted every
+  // duration) — the card then shows "—" instead of a misleading "~0m".
+  recentTimeLabel: string | null;
   recentCount: number;
 };
 
@@ -35,15 +37,15 @@ export function HeadlineStats({
   recentTimeLabel,
   recentCount,
 }: HeadlineStatsProps) {
-  const hasRecent = recentCount > 0;
+  const hasPlays = recentCount > 0;
   return (
     <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
       <Stat label="Top artist" value={topArtist ?? "—"} sub="this window" />
       <Stat label="Top track" value={topTrack ?? "—"} sub="this window" />
       <Stat
         label="Lately"
-        value={hasRecent ? recentTimeLabel : "—"}
-        sub={hasRecent ? `${recentCount} tracks` : "no recent plays"}
+        value={recentTimeLabel ?? "—"}
+        sub={hasPlays ? `${recentCount} plays` : "no recent plays"}
       />
     </div>
   );

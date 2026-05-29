@@ -41,7 +41,7 @@ type ViewState =
       recentlyPlayed: RecentlyPlayedItem[];
       topArtist: string | null;
       topTrack: string | null;
-      recentTimeLabel: string;
+      recentTimeLabel: string | null;
       recentCount: number;
     }
   | { kind: "expired" }
@@ -92,7 +92,12 @@ async function resolveViewState(timeRange: TimeRange): Promise<ViewState> {
     recentlyPlayed: recentResult.items.slice(0, 10),
     topArtist: artistsResult.artists[0]?.name ?? null,
     topTrack: tracksResult.tracks[0]?.name ?? null,
-    recentTimeLabel: formatListeningTime(recentSummary.totalMs),
+    // null when we have plays but no durations (totalMs === 0), so the card
+    // shows "—" rather than a misleading "~0m" next to a real play count.
+    recentTimeLabel:
+      recentSummary.totalMs > 0
+        ? formatListeningTime(recentSummary.totalMs)
+        : null,
     recentCount: recentSummary.trackCount,
   };
 }
