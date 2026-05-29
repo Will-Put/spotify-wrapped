@@ -298,13 +298,15 @@ Now you're ready for the real build.
 
 **The lesson:** Real-time feel (polling), more loading/empty states, working with chronological data.
 
-- [ ] Branch → brainstorm → plan → execute → verify → PR → review → merge → deploy → handoff
+- [x] Branch → brainstorm → plan → execute → verify → PR → review → merge → deploy → handoff
 
 ## PR 7 · Genre breakdown
 
 **What you're building:** A chart showing what genres you listen to most. Spotify gives you artists with genre arrays — you'll count them across your top artists and visualize.
 
 **The lesson:** Data transformation (turning a list of artists into a count of genres), working with derived values.
+
+> **DEFERRED (2026-05-28):** Built the whole thing (spec, plan, Vitest setup, tested transform, component, wiring) on branch `pr-7-genre-breakdown` — but verification revealed Spotify returns **no genre data** to this app in Development Mode (`/me/top/artists` omits `genres`; `/v1/artists` returns 403). The code is correct; the data isn't available yet. Branch is parked unmerged. **Revisit after Extended Quota is approved in PR 10** — re-verify genres actually come back, then finish/merge the branch.
 
 - [ ] Branch → brainstorm → plan → execute → verify → PR → review → merge → deploy → handoff
 
