@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/card";
 import { LoginButton } from "@/components/auth/login-button";
 import { LogoutButton } from "@/components/auth/logout-button";
+import { HeadlineStats } from "@/components/headline-stats";
 import { NowPlaying } from "@/components/now-playing";
 import { RecentlyPlayed } from "@/components/recently-played";
 import { TimeRangeToggle } from "@/components/time-range-toggle";
@@ -24,6 +25,10 @@ import {
   type SpotifyTrack,
   type TimeRange,
 } from "@/lib/spotify";
+import {
+  formatListeningTime,
+  summarizeRecentListening,
+} from "@/lib/listening";
 
 type ViewState =
   | { kind: "anonymous" }
@@ -34,6 +39,10 @@ type ViewState =
       tracks: SpotifyTrack[];
       artists: SpotifyArtist[];
       recentlyPlayed: RecentlyPlayedItem[];
+      topArtist: string | null;
+      topTrack: string | null;
+      recentTimeLabel: string;
+      recentCount: number;
     }
   | { kind: "expired" }
   | { kind: "spotify-down" };
@@ -61,7 +70,7 @@ async function resolveViewState(timeRange: TimeRange): Promise<ViewState> {
       getMe(session.accessToken),
       getTopTracks(session.accessToken, { limit: 10, timeRange }),
       getTopArtists(session.accessToken, { limit: 10, timeRange }),
-      getRecentlyPlayed(session.accessToken, { limit: 10 }),
+      getRecentlyPlayed(session.accessToken, { limit: 50 }),
     ]);
 
   // Each check narrows the result to ok:true for the success branch below.
@@ -70,6 +79,8 @@ async function resolveViewState(timeRange: TimeRange): Promise<ViewState> {
   if (!artistsResult.ok) return failureState(artistsResult);
   if (!recentResult.ok) return failureState(recentResult);
 
+  const recentSummary = summarizeRecentListening(recentResult.items);
+
   return {
     kind: "logged-in",
     // display_name can be null (rare). Fall back to the user's Spotify ID.
@@ -77,7 +88,12 @@ async function resolveViewState(timeRange: TimeRange): Promise<ViewState> {
     timeRange,
     tracks: tracksResult.tracks,
     artists: artistsResult.artists,
-    recentlyPlayed: recentResult.items,
+    // KPI "Lately" uses all 50; the list below shows only the first 10.
+    recentlyPlayed: recentResult.items.slice(0, 10),
+    topArtist: artistsResult.artists[0]?.name ?? null,
+    topTrack: tracksResult.tracks[0]?.name ?? null,
+    recentTimeLabel: formatListeningTime(recentSummary.totalMs),
+    recentCount: recentSummary.trackCount,
   };
 }
 
@@ -118,6 +134,12 @@ export default async function Home({
             <>
               <NowPlaying />
               <TimeRangeToggle current={view.timeRange} />
+              <HeadlineStats
+                topArtist={view.topArtist}
+                topTrack={view.topTrack}
+                recentTimeLabel={view.recentTimeLabel}
+                recentCount={view.recentCount}
+              />
               <TopTracks tracks={view.tracks} />
               <TopArtists artists={view.artists} />
               <RecentlyPlayed items={view.recentlyPlayed} />
