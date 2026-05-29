@@ -316,7 +316,9 @@ Now you're ready for the real build.
 
 **The lesson:** Working with imperfect / estimated data and framing it honestly (don't claim precision you don't have).
 
-- [ ] Branch → brainstorm → plan → execute → verify → PR → review → merge → deploy → handoff
+> **SHIPPED (2026-05-29):** Three honest, text-only cards — **Top artist** (window), **Top track** (window), **Lately** (`~Xh Ym · N plays` from the last 50 plays). Dropped "total tracks" (no honest source) and "top genre" (blocked until Extended Quota / PR 10), exactly the framing lesson. Re-added Vitest to `main`. Merged in #10.
+
+- [x] Branch → brainstorm → plan → execute → verify → PR → review → merge → deploy → handoff
 
 ## PR 9 · Polish pass
 
