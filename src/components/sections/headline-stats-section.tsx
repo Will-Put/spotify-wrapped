@@ -44,6 +44,7 @@ export async function HeadlineStatsSection({
       topTrack={topTrack}
       recentTimeLabel={recentTimeLabel}
       recentCount={recentCount}
+      recentUnavailable={!recentResult.ok}
     />
   );
 }
