@@ -7,6 +7,10 @@ type HeadlineStatsProps = {
   // duration) — the card then shows "—" instead of a misleading "~0m".
   recentTimeLabel: string | null;
   recentCount: number;
+  // true when the recently-played call failed. Distinguishes "loaded, genuinely
+  // zero plays" from "failed to load" so the card never claims "no recent plays"
+  // for data that simply didn't arrive.
+  recentUnavailable?: boolean;
 };
 
 function Stat({
@@ -36,17 +40,19 @@ export function HeadlineStats({
   topTrack,
   recentTimeLabel,
   recentCount,
+  recentUnavailable = false,
 }: HeadlineStatsProps) {
   const hasPlays = recentCount > 0;
+  const latelySub = recentUnavailable
+    ? "unavailable"
+    : hasPlays
+      ? `${recentCount} plays`
+      : "no recent plays";
   return (
     <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
       <Stat label="Top artist" value={topArtist ?? "—"} sub="this window" />
       <Stat label="Top track" value={topTrack ?? "—"} sub="this window" />
-      <Stat
-        label="Lately"
-        value={recentTimeLabel ?? "—"}
-        sub={hasPlays ? `${recentCount} plays` : "no recent plays"}
-      />
+      <Stat label="Lately" value={recentTimeLabel ?? "—"} sub={latelySub} />
     </div>
   );
 }

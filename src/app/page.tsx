@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import {
   Card,
   CardContent,
@@ -6,101 +7,18 @@ import {
 } from "@/components/ui/card";
 import { LoginButton } from "@/components/auth/login-button";
 import { LogoutButton } from "@/components/auth/logout-button";
-import { HeadlineStats } from "@/components/headline-stats";
 import { NowPlaying } from "@/components/now-playing";
-import { RecentlyPlayed } from "@/components/recently-played";
 import { TimeRangeToggle } from "@/components/time-range-toggle";
-import { TopArtists } from "@/components/top-artists";
-import { TopTracks } from "@/components/top-tracks";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { HeadlineStatsSection } from "@/components/sections/headline-stats-section";
+import { TopTracksSection } from "@/components/sections/top-tracks-section";
+import { TopArtistsSection } from "@/components/sections/top-artists-section";
+import { RecentlyPlayedSection } from "@/components/sections/recently-played-section";
 import {
-  getMe,
-  getRecentlyPlayed,
-  getSession,
-  getTopArtists,
-  getTopTracks,
-  parseTimeRange,
-  type RecentlyPlayedItem,
-  type SpotifyApiFailureReason,
-  type SpotifyArtist,
-  type SpotifyTrack,
-  type TimeRange,
-} from "@/lib/spotify";
-import {
-  formatListeningTime,
-  summarizeRecentListening,
-} from "@/lib/listening";
-
-type ViewState =
-  | { kind: "anonymous" }
-  | {
-      kind: "logged-in";
-      displayName: string;
-      timeRange: TimeRange;
-      tracks: SpotifyTrack[];
-      artists: SpotifyArtist[];
-      recentlyPlayed: RecentlyPlayedItem[];
-      topArtist: string | null;
-      topTrack: string | null;
-      recentTimeLabel: string | null;
-      recentCount: number;
-    }
-  | { kind: "expired" }
-  | { kind: "spotify-down" };
-
-// Map a failed Spotify result to the right view state.
-// 401 → expired (re-login fixes it); anything else → spotify-down (transient).
-function failureState(result: {
-  ok: false;
-  status: number;
-  reason: SpotifyApiFailureReason;
-}): Extract<ViewState, { kind: "expired" | "spotify-down" }> {
-  if (result.reason === "http" && result.status === 401) {
-    return { kind: "expired" };
-  }
-  return { kind: "spotify-down" };
-}
-
-async function resolveViewState(timeRange: TimeRange): Promise<ViewState> {
-  const session = await getSession();
-  if (!session) return { kind: "anonymous" };
-
-  // Fetch profile + tracks + artists in parallel for the chosen window.
-  const [meResult, tracksResult, artistsResult, recentResult] =
-    await Promise.all([
-      getMe(session.accessToken),
-      getTopTracks(session.accessToken, { limit: 10, timeRange }),
-      getTopArtists(session.accessToken, { limit: 10, timeRange }),
-      getRecentlyPlayed(session.accessToken, { limit: 50 }),
-    ]);
-
-  // Each check narrows the result to ok:true for the success branch below.
-  if (!meResult.ok) return failureState(meResult);
-  if (!tracksResult.ok) return failureState(tracksResult);
-  if (!artistsResult.ok) return failureState(artistsResult);
-  if (!recentResult.ok) return failureState(recentResult);
-
-  const recentSummary = summarizeRecentListening(recentResult.items);
-
-  return {
-    kind: "logged-in",
-    // display_name can be null (rare). Fall back to the user's Spotify ID.
-    displayName: meResult.profile.display_name ?? meResult.profile.id,
-    timeRange,
-    tracks: tracksResult.tracks,
-    artists: artistsResult.artists,
-    // KPI "Lately" uses all 50; the list below shows only the first 10.
-    recentlyPlayed: recentResult.items.slice(0, 10),
-    topArtist: artistsResult.artists[0]?.name ?? null,
-    topTrack: tracksResult.tracks[0]?.name ?? null,
-    // null when we have plays but no durations (totalMs === 0), so the card
-    // shows "—" rather than a misleading "~0m" next to a real play count.
-    recentTimeLabel:
-      recentSummary.totalMs > 0
-        ? formatListeningTime(recentSummary.totalMs)
-        : null,
-    recentCount: recentSummary.trackCount,
-  };
-}
+  HeadlineStatsSkeleton,
+  ListSkeleton,
+} from "@/components/sections/section-ui";
+import { getMe, getSession, parseTimeRange } from "@/lib/spotify";
 
 export default async function Home({
   searchParams,
@@ -108,50 +26,75 @@ export default async function Home({
   searchParams: Promise<{ range?: string }>;
 }) {
   const { range } = await searchParams;
-  const view = await resolveViewState(parseTimeRange(range));
+  const timeRange = parseTimeRange(range);
+  const session = await getSession();
+
+  // Default (anonymous) state.
+  let description = (
+    <CardDescription>Your listening, your year.</CardDescription>
+  );
+  let body = <LoginButton />;
+
+  if (session) {
+    // One fast profile call decides the global state and the header greeting.
+    // The heavy sections below stream independently.
+    const me = await getMe(session.accessToken);
+    if (!me.ok) {
+      // 401 → expired (re-login fixes it); anything else → transient Spotify error.
+      description =
+        me.reason === "http" && me.status === 401 ? (
+          <CardDescription>Your session expired.</CardDescription>
+        ) : (
+          <CardDescription>
+            Spotify is having trouble right now. Try again in a moment.
+          </CardDescription>
+        );
+      body = <LoginButton />;
+    } else {
+      const token = session.accessToken;
+      const displayName = me.profile.display_name ?? me.profile.id;
+      description = (
+        <CardDescription>
+          Logged in as <strong>{displayName}</strong>
+        </CardDescription>
+      );
+      body = (
+        <>
+          <NowPlaying />
+          <TimeRangeToggle current={timeRange} />
+          <Suspense fallback={<HeadlineStatsSkeleton />}>
+            <HeadlineStatsSection accessToken={token} timeRange={timeRange} />
+          </Suspense>
+          <Suspense fallback={<ListSkeleton title="Top tracks" />}>
+            <TopTracksSection accessToken={token} timeRange={timeRange} />
+          </Suspense>
+          <Suspense fallback={<ListSkeleton title="Top artists" />}>
+            <TopArtistsSection accessToken={token} timeRange={timeRange} />
+          </Suspense>
+          <Suspense fallback={<ListSkeleton title="Recently played" />}>
+            <RecentlyPlayedSection accessToken={token} />
+          </Suspense>
+          <LogoutButton />
+        </>
+      );
+    }
+  }
 
   return (
     <main className="flex flex-1 items-center justify-center p-6">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <h1 className="font-heading text-2xl leading-snug font-medium">
-            Spotify Wrapped
-          </h1>
-          {view.kind === "anonymous" && (
-            <CardDescription>Your listening, your year.</CardDescription>
-          )}
-          {view.kind === "logged-in" && (
-            <CardDescription>
-              Logged in as <strong>{view.displayName}</strong>
-            </CardDescription>
-          )}
-          {view.kind === "expired" && (
-            <CardDescription>Your session expired.</CardDescription>
-          )}
-          {view.kind === "spotify-down" && (
-            <CardDescription>
-              Spotify is having trouble right now. Try again in a moment.
-            </CardDescription>
-          )}
+          <div className="flex items-start justify-between gap-2">
+            <div className="space-y-1">
+              <h1 className="font-heading text-2xl leading-snug font-medium">
+                Spotify Wrapped
+              </h1>
+              {description}
+            </div>
+            <ThemeToggle />
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {view.kind === "logged-in" && (
-            <>
-              <NowPlaying />
-              <TimeRangeToggle current={view.timeRange} />
-              <HeadlineStats
-                topArtist={view.topArtist}
-                topTrack={view.topTrack}
-                recentTimeLabel={view.recentTimeLabel}
-                recentCount={view.recentCount}
-              />
-              <TopTracks tracks={view.tracks} />
-              <TopArtists artists={view.artists} />
-              <RecentlyPlayed items={view.recentlyPlayed} />
-            </>
-          )}
-          {view.kind === "logged-in" ? <LogoutButton /> : <LoginButton />}
-        </CardContent>
+        <CardContent className="space-y-4">{body}</CardContent>
       </Card>
     </main>
   );
