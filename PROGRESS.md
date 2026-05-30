@@ -338,7 +338,9 @@ Also: submit the Spotify app for "Extended Quota Mode" so other people (not just
 
 **The lesson:** This is the moment the app stops being practice and starts being a thing. Make it real.
 
-- [ ] Branch → brainstorm what the signature feature should be → plan → execute → verify → PR → review → merge → deploy
+> **SHIPPED (2026-05-29):** Signature feature = a **Listening Personality card**. Two honest, tested scores from real data — **Explorer %** (distinct artists across all-time top 50 tracks) and **Evolving %** (share of recent top artists not in your all-time list) — map you to one of four archetypes (Devotee / Curator / Phase-Shifter / Wanderer). On-screen card + a **downloadable PNG** via `next/og`. Pure transform unit-tested (15 cases); section streams independently with skeleton + error state. Browser verification caught a real Satori bug (`{value}%` = two child nodes needs `display:flex`); `/code-review` (3 angles) surfaced 6 findings, fixed the one real one (image-fetch timeout + content-type guard). Merged in #12. Spec/plan in `docs/superpowers/`.
+
+- [x] Branch → brainstorm what the signature feature should be → plan → execute → verify → PR → review → merge → deploy
 - [ ] Submit the app for extended quota mode on the Spotify dashboard
 - [ ] Add anyone who wants to test as an approved user in the meantime
 - [ ] Final `/handoff`
