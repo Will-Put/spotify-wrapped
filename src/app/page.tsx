@@ -14,9 +14,11 @@ import { HeadlineStatsSection } from "@/components/sections/headline-stats-secti
 import { TopTracksSection } from "@/components/sections/top-tracks-section";
 import { TopArtistsSection } from "@/components/sections/top-artists-section";
 import { RecentlyPlayedSection } from "@/components/sections/recently-played-section";
+import { PersonalitySection } from "@/components/sections/personality-section";
 import {
   HeadlineStatsSkeleton,
   ListSkeleton,
+  PersonalityCardSkeleton,
 } from "@/components/sections/section-ui";
 import { getMe, getSession, parseTimeRange } from "@/lib/spotify";
 
@@ -61,6 +63,9 @@ export default async function Home({
       body = (
         <>
           <NowPlaying />
+          <Suspense fallback={<PersonalityCardSkeleton />}>
+            <PersonalitySection accessToken={token} />
+          </Suspense>
           <TimeRangeToggle current={timeRange} />
           <Suspense fallback={<HeadlineStatsSkeleton />}>
             <HeadlineStatsSection accessToken={token} timeRange={timeRange} />
