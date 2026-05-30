@@ -6,9 +6,15 @@ import { artistImageUrl } from "@/lib/personality";
 async function toDataUrl(url: string | undefined): Promise<string | null> {
   if (!url) return null;
   try {
-    const res = await fetch(url);
+    // Time-box the fetch so a stalled image CDN can't hang PNG generation —
+    // on timeout (or any failure) we return null and the caller falls back to
+    // the initial-letter avatar.
+    const res = await fetch(url, { signal: AbortSignal.timeout(3000) });
     if (!res.ok) return null;
-    const contentType = res.headers.get("content-type") ?? "image/jpeg";
+    // Only embed a genuine image. A 200 with an HTML error/redirect body would
+    // otherwise be base64'd into a corrupt data URL that breaks the render.
+    const contentType = res.headers.get("content-type");
+    if (!contentType?.startsWith("image/")) return null;
     const base64 = Buffer.from(await res.arrayBuffer()).toString("base64");
     return `data:${contentType};base64,${base64}`;
   } catch {
