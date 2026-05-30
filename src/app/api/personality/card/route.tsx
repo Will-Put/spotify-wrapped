@@ -85,7 +85,7 @@ export async function GET() {
             }}
           >
             <div style={{ fontSize: 64, fontWeight: 700, color: "#1DB954" }}>
-              {personality.explorerPct}%
+              {`${personality.explorerPct}%`}
             </div>
             <div style={{ fontSize: 26, color: "rgba(255,255,255,0.7)" }}>
               Explorer
@@ -102,7 +102,7 @@ export async function GET() {
             }}
           >
             <div style={{ fontSize: 64, fontWeight: 700, color: "#1DB954" }}>
-              {personality.evolvingPct}%
+              {`${personality.evolvingPct}%`}
             </div>
             <div style={{ fontSize: 26, color: "rgba(255,255,255,0.7)" }}>
               Evolving
