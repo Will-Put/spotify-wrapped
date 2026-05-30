@@ -42,6 +42,25 @@ export function HeadlineStatsSkeleton() {
   );
 }
 
+export function PersonalityCardSkeleton() {
+  return (
+    <div className="space-y-3 rounded-xl border p-6">
+      <Skeleton className="h-2.5 w-24" />
+      <Skeleton className="h-6 w-40" />
+      <Skeleton className="h-3 w-full" />
+      <div className="flex gap-2">
+        <Skeleton className="h-14 flex-1 rounded-lg" />
+        <Skeleton className="h-14 flex-1 rounded-lg" />
+      </div>
+      <div className="flex gap-2">
+        <Skeleton className="size-9 rounded-full" />
+        <Skeleton className="size-9 rounded-full" />
+        <Skeleton className="size-9 rounded-full" />
+      </div>
+    </div>
+  );
+}
+
 export function SectionError({ title }: { title: string }) {
   return (
     <div className="space-y-3">
